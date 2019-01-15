@@ -73,9 +73,11 @@ class OwnPromise {
     }
 
     const onFulfilledF = typeof onFulfilled === 'function' ? onFulfilled : value => value;
-    const onRejectedF = typeof onRejected === 'function' ? onRejected : error => error;
+    const onRejectedF = typeof onRejected === 'function' ? onRejected : error => {
+      error;
+    };
 
-    return new OwnPromise((resolve, reject) => {
+    return new this.constructor((resolve, reject) => {
       if (typeof resolve !== 'function' || typeof reject !== 'function') {
         throw new TypeError('Not a function');
       }
