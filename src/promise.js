@@ -46,32 +46,14 @@ class OwnPromise {
     }
   }
   static helperFunction(resCallback, resolve, reject) {
-    if (typeof resolve !== 'function' || typeof reject !== 'function') {
-      throw new TypeError('Not a function');
-    }
-
-    try {
-      if (resCallback instanceof OwnPromise) {
-        resCallback.then(a => resolve(a));
-      } else {
-        resolve(resCallback);
-      }
-    } catch (e) {
-      reject(e);
-    }
-
     if (resCallback instanceof OwnPromise) {
-      resCallback.then(a => reject(a));
+      resCallback.then(a => resolve(a));
     } else {
-      reject(resCallback);
+      resolve(resCallback);
     }
   }
 
   then(onFulfilled, onRejected) {
-    if (!(this instanceof OwnPromise)) {
-      throw new TypeError('Not a function');
-    }
-
     const onFulfilledF = typeof onFulfilled === 'function' ? onFulfilled : value => value;
     const onRejectedF = typeof onRejected === 'function' ? onRejected : error => {
       error;
@@ -82,26 +64,24 @@ class OwnPromise {
         throw new TypeError('Not a function');
       }
 
-      if (this.status === FULFILLED) {
+      switch (this.status) {
+      case FULFILLED:
         setTimeout(() => {
           const resCallback = onFulfilledF(this.value);
           OwnPromise.helperFunction(resCallback, resolve, reject);
         }, 0);
-      } else if (this.status === REJECTED) {
+        break;
+      case REJECTED:
         setTimeout(() => {
           const resCallback = onRejectedF(this.error);
           OwnPromise.helperFunction(resCallback, resolve, reject);
         }, 0);
-      } else if (this.status === PENDING) {
+        break;
+      default:
         this.onFulfilledCallbacks.push(value => {
-          try {
-            const resCallback = onFulfilledF(value);
-            OwnPromise.helperFunction(resCallback, resolve, reject);
-          } catch (error) {
-            reject(error);
-          }
+          const resCallback = onFulfilledF(value);
+          OwnPromise.helperFunction(resCallback, resolve, reject);
         });
-
         this.onRejectedCallbacks.push(error => {
           const resCallback = onRejectedF(error);
           OwnPromise.helperFunction(resCallback, resolve, reject);
@@ -132,16 +112,6 @@ class OwnPromise {
   }
 
   static all(promises) {
-    if (typeof this !== 'function') {
-      throw new TypeError('this !== function');
-    }
-
-    if (promises.length === undefined) {
-      return new OwnPromise((resolve, reject) => {
-        reject(new TypeError('Not an itterable'));
-      });
-    }
-
     if (promises.length === 0) {
       return new this((resolve, reject) => {
         resolve([]);
@@ -167,16 +137,8 @@ class OwnPromise {
   }
 
   static race(promises) {
-    if (typeof this !== 'function') {
-      throw new TypeError('this is not a constructor');
-    }
-
-    if (promises === []) {
-      return new OwnPromise((resolve, reject) => ({}));
-    }
-
     if (promises.length === undefined) {
-      return new OwnPromise((_, reject) => {
+      return new OwnPromise((resolve, reject) => {
         reject(new TypeError('Not an itterable'));
       });
     }
