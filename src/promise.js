@@ -1,7 +1,6 @@
 const PENDING = 'PENDING';
 const FULFILLED = 'FULFILLED';
 const REJECTED = 'REJECTED';
-
 class OwnPromise {
   constructor(executor) {
     if (typeof executor !== 'function') {
@@ -54,8 +53,8 @@ class OwnPromise {
   }
 
   then(onFulfilled, onRejected) {
-    const onFulfilledF = typeof onFulfilled === 'function' ? onFulfilled : value => value;
-    const onRejectedF = typeof onRejected === 'function' ? onRejected : error => {
+    const onResolved = typeof onFulfilled === 'function' ? onFulfilled : value => value;
+    const onRejecte = typeof onRejected === 'function' ? onRejected : error => {
       error;
     };
 
@@ -67,23 +66,23 @@ class OwnPromise {
       switch (this.status) {
       case FULFILLED:
         setTimeout(() => {
-          const resCallback = onFulfilledF(this.value);
+          const resCallback = onResolved(this.value);
           OwnPromise.helperFunction(resCallback, resolve, reject);
         }, 0);
         break;
       case REJECTED:
         setTimeout(() => {
-          const resCallback = onRejectedF(this.error);
+          const resCallback = onRejecte(this.error);
           OwnPromise.helperFunction(resCallback, resolve, reject);
         }, 0);
         break;
       default:
         this.onFulfilledCallbacks.push(value => {
-          const resCallback = onFulfilledF(value);
+          const resCallback = onResolved(value);
           OwnPromise.helperFunction(resCallback, resolve, reject);
         });
         this.onRejectedCallbacks.push(error => {
-          const resCallback = onRejectedF(error);
+          const resCallback = onRejecte(error);
           OwnPromise.helperFunction(resCallback, resolve, reject);
         });
       }
