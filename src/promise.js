@@ -1,6 +1,7 @@
 const PENDING = 'PENDING';
 const FULFILLED = 'FULFILLED';
 const REJECTED = 'REJECTED';
+
 class OwnPromise {
   constructor(executor) {
     if (typeof executor !== 'function') {
@@ -44,17 +45,10 @@ class OwnPromise {
       reject(error);
     }
   }
-  static helperFunction(resCallback, resolve, reject) {
-    if (resCallback instanceof OwnPromise) {
-      resCallback.then(a => resolve(a));
-    } else {
-      resolve(resCallback);
-    }
-  }
 
   then(onFulfilled, onRejected) {
     const onResolved = typeof onFulfilled === 'function' ? onFulfilled : value => value;
-    const onRejecte = typeof onRejected === 'function' ? onRejected : error => {
+    const onReject = typeof onRejected === 'function' ? onRejected : error => {
       error;
     };
 
@@ -66,24 +60,40 @@ class OwnPromise {
       switch (this.status) {
       case FULFILLED:
         setTimeout(() => {
-          const resCallback = onResolved(this.value);
-          OwnPromise.helperFunction(resCallback, resolve, reject);
+          try {
+            const resCallback = onResolved(this.value);
+            resolve(resCallback);
+          } catch (error) {
+            reject(error);
+          }
         }, 0);
         break;
       case REJECTED:
         setTimeout(() => {
-          const resCallback = onRejecte(this.error);
-          OwnPromise.helperFunction(resCallback, resolve, reject);
+          try {
+            const resCallback = onReject(this.error);
+            resolve(resCallback);
+          } catch (error) {
+            reject(error);
+          }
         }, 0);
         break;
       default:
         this.onFulfilledCallbacks.push(value => {
-          const resCallback = onResolved(value);
-          OwnPromise.helperFunction(resCallback, resolve, reject);
+          try {
+            const resCallback = onResolved(value);
+            resolve(resCallback);
+          } catch (error) {
+            reject(error);
+          }
         });
         this.onRejectedCallbacks.push(error => {
-          const resCallback = onRejecte(error);
-          OwnPromise.helperFunction(resCallback, resolve, reject);
+          try {
+            const resCallback = onReject(error);
+            resolve(resCallback);
+          } catch (error) {
+            reject(error);
+          }
         });
       }
     });
@@ -100,7 +110,6 @@ class OwnPromise {
       resolve(value);
     });
   }
-
   static reject(error) {
     return new this((resolve, reject) => {
       if (typeof resolve !== 'function' || typeof reject !== 'function') {
@@ -109,7 +118,6 @@ class OwnPromise {
       reject(error);
     });
   }
-
   static all(promises) {
     if (promises.length === 0) {
       return new this((resolve, reject) => {
@@ -134,7 +142,6 @@ class OwnPromise {
       });
     });
   }
-
   static race(promises) {
     if (promises.length === undefined) {
       return new OwnPromise((resolve, reject) => {
@@ -155,7 +162,6 @@ class OwnPromise {
       }
     });
   }
-
   catch(onRejected) {
     return this.then(null, onRejected);
   }

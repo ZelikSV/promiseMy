@@ -22,10 +22,10 @@ describe("25.4.5 Properties of the Promise Prototype Object", function () {
 });
 
 describe("25.4.5.1 Promise.prototype.catch( onRejected )", function () {
-    it("is a function+++", function () {
+    it("is a function", function () {
         assert.equal("function", typeof Promise.prototype.catch);
     });
-    it("expects 'this' to be a Promise+++", function () {
+    it("expects 'this' to be a Promise", function () {
         const prom = new Promise(function () {});
         prom.catch(()=>{});
         assert.ok(prom instanceof Promise);
@@ -43,7 +43,7 @@ describe("25.4.5.2 Promise.prototype.constructor", function () {
     it("is an object++", function () {
         assert.ok(Promise.prototype.constructor instanceof Object);
     });
-    it("is a function++", function () {
+    it("is a function", function () {
         assert.equal("function", typeof Promise.prototype.constructor);
     });
     it("is the Promise constructor");
@@ -53,13 +53,13 @@ describe("25.4.5.3 Promise.prototype.then", function () {
     it("Promise.prototype.then is a function++++", function () {
         assert.equal("function", typeof Promise.prototype.then);
     });
-    it("expects 'this' to be a Promise+++", function(){
+    it("expects 'this' to be a Promise", function(){
         const a = new Promise(()=>{});
         const b = a.then(()=>{});
         assert.ok((b instanceof Promise));
     });
 
-    it("throws TypeError if 'this' is not a Promise++", function () {
+    it("throws TypeError if 'this' is not a Promise", function () {
         const errorValue = 4;
         assert.throws(function () {
             errorValue.then(function () {});
